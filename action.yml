@@ -1,0 +1,66 @@
+name: "Release PR (head -> base)"
+description: "Create or update a PR from head branch into base branch and generate changelog from merge commits."
+author: "itamm15"
+branding:
+  icon: "git-pull-request"
+  color: "blue"
+
+inputs:
+  base:
+    description: "Base branch"
+    required: true
+    default: "main"
+  head:
+    description: "Head branch"
+    required: true
+    default: "develop"
+  title:
+    description: "PR title"
+    required: false
+    default: "Release PR"
+  token:
+    description: "GitHub token (GITHUB_TOKEN or PAT)"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        fetch-depth: 0
+
+    - name: Generate changelog
+      shell: bash
+      run: |
+        set -euo pipefail
+        git fetch origin "${{ inputs.base }}" "${{ inputs.head }}"
+
+        RANGE="origin/${{ inputs.base }}..origin/${{ inputs.head }}"
+        git log --merges --pretty=format:'%s' "$RANGE" > body.md
+
+    - name: Create or update PR
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+      run: |
+        set -euo pipefail
+
+        PR_NUMBER=$(gh pr list \
+          --base "${{ inputs.base }}" \
+          --head "${{ inputs.head }}" \
+          --state open \
+          --json number \
+          --jq '.[0].number')
+
+        if [ -n "${PR_NUMBER:-}" ]; then
+          echo "PR exists (#$PR_NUMBER), updating"
+          gh pr edit "$PR_NUMBER" --title "${{ inputs.title }}" --body-file body.md
+        else
+          echo "Creating PR"
+          gh pr create \
+            --base "${{ inputs.base }}" \
+            --head "${{ inputs.head }}" \
+            --title "${{ inputs.title }}" \
+            --body-file body.md
+        fi
