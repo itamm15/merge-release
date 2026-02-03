@@ -62,7 +62,7 @@ jobs:
     steps:
       - name: Create or update release PR
         # Pin to a specific commit for reproducible runs
-        uses: itamm15/release-please-action@<commit-sha>
+        uses: itamm15/merge-release-action@<commit-sha>
         with:
           base: ${{ github.event.inputs.base }}
           head: ${{ github.event.inputs.head }}
@@ -75,7 +75,7 @@ You can also hard-code the branches if you always release from a specific head t
 ```yaml
       - name: Create or update release PR
         # Pin to a specific commit for reproducible runs
-        uses: itamm15/release-please-action@<commit-sha>
+        uses: itamm15/merge-release-action@<commit-sha>
         with:
           base: main
           head: develop
@@ -83,13 +83,13 @@ You can also hard-code the branches if you always release from a specific head t
 ```
 
 > **Recommendation**: Always **pin this action by commit SHA**  
-> (for example `itamm15/release-please-action@a1b2c3d4e5f6...`) rather than a branch or tag.  
+> (for example `itamm15/merge-release-action@a1b2c3d4e5f6...`) rather than a branch or tag.  
 > This ensures your workflows stay reproducible and are not affected by future changes to this repository.
 
 ### Example repository
 
 For a concrete example of how this action can be wired into a workflow, see the companion repository:  
-[release-please-use-case](https://github.com/itamm15/release-please-use-case).
+[merge-release-use-case](https://github.com/itamm15/merge-release-use-case).
 
 ### Requirements & notes
 
